@@ -1,0 +1,48 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "家语AI - 亲子情感沟通与家庭记忆传承智能助手"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "家语AI主入口"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "家语AI"
+    },
+    {
+      "name": "kinvoice_agent_desc",
+      "value": "家语AI智能助手能力"
+    },
+    {
+      "name": "kinvoice_agent_label",
+      "value": "家语AI助手"
+    },
+    {
+      "name": "kinvoice_card_desc",
+      "value": "家语AI桌面卡片"
+    },
+    {
+      "name": "perm_internet",
+      "value": "用于连接AI服务，实现语音对话和情感分析功能"
+    },
+    {
+      "name": "perm_write_media",
+      "value": "用于保存家庭记忆照片和录音文件"
+    },
+    {
+      "name": "perm_read_media",
+      "value": "用于读取家庭记忆库中的照片和录音"
+    },
+    {
+      "name": "perm_microphone",
+      "value": "用于录音功能，实现语音对话交互"
+    },
+    {
+      "name": "perm_record_audio",
+      "value": "用于录制家庭语音日记和对话内容"
+    }
+  ]
+}

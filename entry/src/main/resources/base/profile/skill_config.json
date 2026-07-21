@@ -1,0 +1,60 @@
+{
+  "skills": [
+    {
+      "name": "KinVoiceChatSkill",
+      "description": "与家语AI进行对话交流",
+      "type": "action",
+      "trigger": {
+        "type": "intent",
+        "intents": [
+          {
+            "action": "ohos.want.action.KINVOICE_CHAT",
+            "entities": [
+              "entity.system.text"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "用户发送的消息内容"
+        }
+      ],
+      "result": {
+        "type": "json",
+        "description": "AI回复的内容"
+      }
+    },
+    {
+      "name": "KinVoiceNVCConvertSkill",
+      "description": "将话语转换为NVC非暴力沟通表达",
+      "type": "action",
+      "trigger": {
+        "type": "intent",
+        "intents": [
+          {
+            "action": "ohos.want.action.KINVOICE_NVC",
+            "entities": [
+              "entity.system.text"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "需要转换的原始文本"
+        }
+      ],
+      "result": {
+        "type": "json",
+        "description": "NVC转换结果"
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "src": [
+    "pages/Main",
+    "pages/BreakIce",
+    "pages/Memory",
+    "pages/Profile",
+    "pages/ChatRoom",
+    "pages/ProfileDetail"
+  ]
+}
