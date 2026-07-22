@@ -1,0 +1,8 @@
+- [ ] Checkpoint 1: 互动卡片组件支持动态数据展示和点击跳转
+- [ ] Checkpoint 2: 卡片配置文件包含2x2和4x2尺寸支持
+- [ ] Checkpoint 3: 空间音频服务实现完整的TTS语音合成功能
+- [ ] Checkpoint 4: CompanionTab组件添加语音播放按钮
+- [ ] Checkpoint 5: Skill Ability组件创建并正确注册
+- [ ] Checkpoint 6: Skill配置文件包含完整的intent和参数定义
+- [ ] Checkpoint 7: 构建命令执行成功，无编译错误
+- [ ] Checkpoint 8: 应用预览正常，所有鸿蒙特性可交互
