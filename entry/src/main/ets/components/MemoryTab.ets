@@ -1,4 +1,5 @@
 import { getStorage, setStorage } from '../utils';
+import { MemoryAPI } from '../services/api';
 import { showToast } from '../components/Toast';
 
 const STORAGE_KEY = 'memory_cards';
@@ -445,8 +446,23 @@ struct MemoryTab {
 
   async loadCards(): Promise<void> {
     if (!this.mounted) return;
+    const response = await MemoryAPI.listCards();
+    const apiCards = response.data.cards || [];
     const grouped: Record<string, MemoryCard[]> = {};
     CATEGORIES.forEach(cat => { grouped[cat] = []; });
+    apiCards.forEach((apiCard: { id: string; title: string; content: string; category: string; created_at: string }) => {
+      const cat = apiCard.category || '人生阅历';
+      if (grouped[cat]) {
+        grouped[cat].push({
+          id: apiCard.id,
+          tag: cat,
+          date: apiCard.created_at ? apiCard.created_at.split('T')[0].replace(/-/g, '.') : new Date().toLocaleDateString('zh-CN').replace(/\//g, '.'),
+          title: apiCard.title,
+          content: apiCard.content,
+          author: '我'
+        });
+      }
+    });
     this.cards = grouped;
     this.saveToCache();
   }
@@ -511,59 +527,81 @@ struct MemoryTab {
     this.editingCardIndex = -1;
   }
 
-  saveCard(): void {
+  async saveCard(): Promise<void> {
     if (!this.mounted) return;
     if (!this.formData.title || !this.formData.content) {
       showToast('请填写完整信息');
       return;
     }
     if (this.editMode) {
-      this.doUpdateCard();
+      await this.doUpdateCard();
     } else {
-      this.doCreateCard();
+      await this.doCreateCard();
     }
   }
 
-  doCreateCard(): void {
+  async doCreateCard(): Promise<void> {
     if (!this.mounted) return;
     const cat = this.formData.category;
-    const folderId = this._categoryFolders[cat] || undefined;
-    const card: MemoryCard = {
-      tag: cat,
-      date: new Date().toLocaleDateString('zh-CN').replace(/\//g, '.'),
-      title: this.formData.title,
-      content: this.formData.content,
-      author: this.formData.author || '我',
-      folder_id: folderId
-    };
-    this.cards[cat].unshift(card);
-    this.saveToCache();
-    this.hideModal();
-    showToast('保存成功');
+    try {
+      const response = await MemoryAPI.createCard({
+        title: this.formData.title,
+        content: this.formData.content,
+        category: cat
+      });
+      const apiCard = response.data;
+      const card: MemoryCard = {
+        id: apiCard.id,
+        tag: cat,
+        date: apiCard.created_at ? apiCard.created_at.split('T')[0].replace(/-/g, '.') : new Date().toLocaleDateString('zh-CN').replace(/\//g, '.'),
+        title: apiCard.title,
+        content: apiCard.content,
+        author: this.formData.author || '我'
+      };
+      this.cards[cat].unshift(card);
+      this.saveToCache();
+      this.hideModal();
+      showToast('保存成功');
+    } catch (e) {
+      console.error('创建卡片失败:', e);
+      showToast('保存失败，请重试');
+    }
   }
 
-  doUpdateCard(): void {
+  async doUpdateCard(): Promise<void> {
     if (!this.mounted) return;
     const card = this.editingCard;
     const index = this.editingCardIndex;
-    if (!card || index < 0) return;
+    if (!card || index < 0 || !card.id) return;
 
     const oldTag = card.tag;
     const newTag = this.formData.category;
 
-    card.title = this.formData.title;
-    card.content = this.formData.content;
-    card.author = this.formData.author || '我';
-    card.tag = newTag;
+    try {
+      const response = await MemoryAPI.updateCard(card.id, {
+        title: this.formData.title,
+        content: this.formData.content,
+        category: newTag
+      });
+      const apiCard = response.data;
+      card.id = apiCard.id;
+      card.title = apiCard.title;
+      card.content = apiCard.content;
+      card.author = this.formData.author || '我';
+      card.tag = newTag;
 
-    if (newTag !== oldTag) {
-      this.cards[oldTag].splice(index, 1);
-      this.cards[newTag].unshift(card);
+      if (newTag !== oldTag) {
+        this.cards[oldTag].splice(index, 1);
+        this.cards[newTag].unshift(card);
+      }
+
+      this.saveToCache();
+      this.hideModal();
+      showToast('保存成功');
+    } catch (e) {
+      console.error('更新卡片失败:', e);
+      showToast('保存失败，请重试');
     }
-
-    this.saveToCache();
-    this.hideModal();
-    showToast('保存成功');
   }
 
   deleteCard(card: MemoryCard, index: number): void {
@@ -580,21 +618,29 @@ struct MemoryTab {
     this.deleteTargetIndex = -1;
   }
 
-  confirmDelete(): void {
+  async confirmDelete(): Promise<void> {
     if (!this.mounted) return;
     const card = this.deleteTarget;
     const index = this.deleteTargetIndex;
     const cat = card ? card.tag || '人生阅历' : '人生阅历';
 
     if (card && index >= 0) {
-      this.cards[cat].splice(index, 1);
-      this.saveToCache();
+      try {
+        if (card.id) {
+          await MemoryAPI.deleteCard(card.id);
+        }
+        this.cards[cat].splice(index, 1);
+        this.saveToCache();
+        showToast('已删除');
+      } catch (e) {
+        console.error('删除卡片失败:', e);
+        showToast('删除失败，请重试');
+      }
     }
 
     this.showDeleteConfirm = false;
     this.deleteTarget = null;
     this.deleteTargetIndex = -1;
-    showToast('已删除');
   }
 
   refresh(): void {

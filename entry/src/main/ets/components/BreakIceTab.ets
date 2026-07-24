@@ -1,4 +1,4 @@
-import { FamilyAPI } from '../services/api';
+import { FamilyAPI, ChatAPI } from '../services/api';
 import { showToast } from '../components/Toast';
 
 interface RawConversation {
@@ -330,12 +330,25 @@ struct BreakIceTab {
       }
 
       if (this.familyId) {
-        this.rawConvs = [];
+        const convRes = await ChatAPI.listConversations();
+        if (!this.mounted) return;
+        if (convRes.success && convRes.data.conversations) {
+          this.rawConvs = convRes.data.conversations.map((c: { id: number; title: string; updated_at?: string; last_message?: string }) => ({
+            id: c.id,
+            type: 'group',
+            title: c.title || '家庭群聊',
+            last_message: c.last_message || '',
+            last_time: c.updated_at || '',
+          }));
+        } else {
+          this.rawConvs = [];
+        }
       } else {
         this.rawConvs = [];
       }
     } catch (e) {
       console.log('加载聊天列表失败:', e);
+      this.rawConvs = [];
     } finally {
       if (this.mounted) {
         this.loading = false;

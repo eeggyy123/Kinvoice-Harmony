@@ -116,7 +116,28 @@ export class MemoryAPI {
   }
 }
 
+export interface AuthRequest {
+  username: string;
+  password: string;
+  nickname?: string;
+}
+
+export interface AuthResponse {
+  user: UserProfile;
+  token?: string;
+}
+
 export class ProfileAPI {
+  static async login(data: AuthRequest): Promise<APIResponse<AuthResponse>> {
+    const response = await httpService.post<APIResponse<AuthResponse>>('/auth/login', data);
+    return response.data;
+  }
+
+  static async register(data: AuthRequest): Promise<APIResponse<AuthResponse>> {
+    const response = await httpService.post<APIResponse<AuthResponse>>('/auth/register', data);
+    return response.data;
+  }
+
   static async getProfile(): Promise<APIResponse<UserProfile>> {
     const response = await httpService.get<APIResponse<UserProfile>>('/profile');
     return response.data;

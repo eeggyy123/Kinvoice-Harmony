@@ -1,3 +1,4 @@
+import { ProfileAPI } from '../services/api';
 import { showToast } from '../components/Toast';
 
 @Component
@@ -377,17 +378,28 @@ struct ProfileTab {
     this.authLoading = true;
     try {
       if (this.authMode === 'login') {
-        this.nickname = nickname || username;
-        this.isLoggedIn = true;
-        this.showPanel = false;
-        showToast('登录成功！');
+        const response = await ProfileAPI.login({ username, password });
+        if (response.success && response.data.user) {
+          this.nickname = response.data.user.nickname || username;
+          this.isLoggedIn = true;
+          this.showPanel = false;
+          showToast('登录成功！');
+        } else {
+          showToast(response.message || '登录失败');
+        }
       } else {
-        this.nickname = nickname;
-        this.isLoggedIn = true;
-        this.showPanel = false;
-        showToast('注册成功！');
+        const response = await ProfileAPI.register({ username, password, nickname });
+        if (response.success && response.data.user) {
+          this.nickname = response.data.user.nickname || nickname;
+          this.isLoggedIn = true;
+          this.showPanel = false;
+          showToast('注册成功！');
+        } else {
+          showToast(response.message || '注册失败');
+        }
       }
     } catch (e) {
+      console.error('认证失败:', e);
       showToast('操作失败，请重试');
     } finally {
       this.authLoading = false;
@@ -407,10 +419,16 @@ struct ProfileTab {
     if (this.saving) return;
     this.saving = true;
     try {
-      this.nickname = trimmed;
-      this.showPanel = false;
-      showToast('昵称已更新');
+      const response = await ProfileAPI.updateProfile({ nickname: trimmed });
+      if (response.success) {
+        this.nickname = trimmed;
+        this.showPanel = false;
+        showToast('昵称已更新');
+      } else {
+        showToast(response.message || '保存失败');
+      }
     } catch (e) {
+      console.error('更新昵称失败:', e);
       showToast('保存失败，请重试');
     } finally {
       this.saving = false;
