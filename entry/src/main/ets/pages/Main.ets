@@ -9,6 +9,7 @@ import Tabbar from '../components/Tabbar';
 struct Main {
   @State activeTab: string = 'companion';
   @State showCount: number = 0;
+  @State refreshTrigger: number = 0;
 
   build() {
     Column() {
@@ -22,13 +23,13 @@ struct Main {
 
   @Builder RenderContent() {
     if (this.activeTab === 'companion') {
-      CompanionTab();
+      CompanionTab({ refreshTrigger: this.refreshTrigger });
     } else if (this.activeTab === 'breakIce') {
-      BreakIceTab();
+      BreakIceTab({ refreshTrigger: this.refreshTrigger });
     } else if (this.activeTab === 'memory') {
-      MemoryTab();
+      MemoryTab({ refreshTrigger: this.refreshTrigger });
     } else if (this.activeTab === 'profile') {
-      ProfileTab();
+      ProfileTab({ refreshTrigger: this.refreshTrigger });
     }
   }
 
@@ -45,5 +46,6 @@ struct Main {
   }
 
   refreshCurrentTab(): void {
+    this.refreshTrigger++;
   }
 }

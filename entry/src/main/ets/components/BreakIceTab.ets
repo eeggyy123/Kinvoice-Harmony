@@ -34,6 +34,7 @@ interface ConversationItem {
 
 @Component
 struct BreakIceTab {
+  @Prop refreshTrigger: number = 0;
   @State familyId: string = '';
   @State myUserId: string = '';
   @State loading: boolean = true;
@@ -317,6 +318,13 @@ struct BreakIceTab {
     this.mounted = false;
   }
 
+  @Watch('onRefreshTriggerChange')
+  onRefreshTriggerChange(): void {
+    if (this.mounted && !this.loadingData) {
+      this.loadData();
+    }
+  }
+
   async loadData(): Promise<void> {
     this.loadingData = true;
     this.loading = true;
@@ -372,7 +380,7 @@ struct BreakIceTab {
   }
 
   refresh(): void {
-    if (this.mounted && this.myUserId && !this.loadingData) {
+    if (this.mounted && !this.loadingData) {
       this.loadData();
     }
   }

@@ -1,5 +1,6 @@
 import http from '@ohos.net.http';
 import { BusinessError } from '@ohos.base';
+import { Constants, getStorage } from '../utils';
 
 export interface HttpResponse<T> {
   data: T;
@@ -73,7 +74,8 @@ export class HttpService {
     console.debug(`[HTTP][${requestId}] Request: ${options.method || 'GET'} ${url}`);
 
     try {
-      const response = await this.httpClient.request(url, this.buildRequestOptions(options));
+      const requestOptions = await this.buildRequestOptions(options);
+      const response = await this.httpClient.request(url, requestOptions);
       const result = this.parseResponse<T>(response);
       console.debug(`[HTTP][${requestId}] Success: ${result.statusCode}`);
       return result;
@@ -91,7 +93,7 @@ export class HttpService {
     }
   }
 
-  private buildRequestOptions(options: HttpRequestOptions): http.HttpRequestOptions {
+  private async buildRequestOptions(options: HttpRequestOptions): Promise<http.HttpRequestOptions> {
     const {
       method = 'GET',
       headers = {},
@@ -104,6 +106,15 @@ export class HttpService {
       'Accept': 'application/json',
       ...headers
     };
+
+    try {
+      const token = await getStorage(Constants.STORAGE_KEY_TOKEN);
+      if (token && typeof token === 'string') {
+        defaultHeaders['Authorization'] = `Bearer ${token}`;
+      }
+    } catch (e) {
+      console.debug('[HTTP] Failed to get auth token:', e);
+    }
 
     return {
       method: http.RequestMethod[method],

@@ -24,6 +24,7 @@ interface FormData {
 
 @Component
 struct MemoryTab {
+  @Prop refreshTrigger: number = 0;
   @State activeCategory: string = '人生阅历';
   @State showModalFlag: boolean = false;
   @State editMode: boolean = false;
@@ -424,6 +425,13 @@ struct MemoryTab {
 
   aboutToDisappear(): void {
     this.mounted = false;
+  }
+
+  @Watch('onRefreshTriggerChange')
+  onRefreshTriggerChange(): void {
+    if (this.mounted && !this.loading) {
+      this.loadAll();
+    }
   }
 
   async loadAll(): Promise<void> {

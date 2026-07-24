@@ -1,8 +1,10 @@
 import { ProfileAPI } from '../services/api';
 import { showToast } from '../components/Toast';
+import { Constants, setStorage, getStorage, removeStorage } from '../utils';
 
 @Component
 struct ProfileTab {
+  @Prop refreshTrigger: number = 0;
   @State nickname: string = '';
   @State isLoggedIn: boolean = false;
 
@@ -320,11 +322,30 @@ struct ProfileTab {
     }
   }
 
-  aboutToAppear(): void {
+  async aboutToAppear(): Promise<void> {
     this.nickname = '';
     this.isLoggedIn = false;
     this.showPanel = false;
     this.saving = false;
+    await this.restoreLoginState();
+  }
+
+  @Watch('onRefreshTriggerChange')
+  onRefreshTriggerChange(): void {
+    this.restoreLoginState();
+  }
+
+  async restoreLoginState(): Promise<void> {
+    try {
+      const token = await getStorage(Constants.STORAGE_KEY_TOKEN);
+      const nickname = await getStorage(Constants.STORAGE_KEY_USER_NICKNAME);
+      if (token && nickname) {
+        this.nickname = nickname as string;
+        this.isLoggedIn = true;
+      }
+    } catch (e) {
+      console.error('恢复登录状态失败:', e);
+    }
   }
 
   refresh(): void {
@@ -382,6 +403,10 @@ struct ProfileTab {
         if (response.success && response.data.user) {
           this.nickname = response.data.user.nickname || username;
           this.isLoggedIn = true;
+          if (response.data.token) {
+            await setStorage(Constants.STORAGE_KEY_TOKEN, response.data.token);
+          }
+          await setStorage(Constants.STORAGE_KEY_USER_NICKNAME, this.nickname);
           this.showPanel = false;
           showToast('登录成功！');
         } else {
@@ -392,6 +417,10 @@ struct ProfileTab {
         if (response.success && response.data.user) {
           this.nickname = response.data.user.nickname || nickname;
           this.isLoggedIn = true;
+          if (response.data.token) {
+            await setStorage(Constants.STORAGE_KEY_TOKEN, response.data.token);
+          }
+          await setStorage(Constants.STORAGE_KEY_USER_NICKNAME, this.nickname);
           this.showPanel = false;
           showToast('注册成功！');
         } else {
@@ -435,7 +464,13 @@ struct ProfileTab {
     }
   }
 
-  doLogout(): void {
+  async doLogout(): Promise<void> {
+    try {
+      await removeStorage(Constants.STORAGE_KEY_TOKEN);
+      await removeStorage(Constants.STORAGE_KEY_USER_NICKNAME);
+    } catch (e) {
+      console.error('清除登录状态失败:', e);
+    }
     this.nickname = '';
     this.isLoggedIn = false;
     this.showPanel = false;

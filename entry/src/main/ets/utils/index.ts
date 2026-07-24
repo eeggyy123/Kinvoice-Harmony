@@ -23,6 +23,8 @@ export const Constants = {
   STORAGE_KEY_CONV_LIST: 'companion_conv_list',
   STORAGE_KEY_CONV_MSG_PREFIX: 'conv_msgs_',
   STORAGE_KEY_SELECTED_VOICE: 'selected_voice',
+  STORAGE_KEY_TOKEN: 'auth_token',
+  STORAGE_KEY_USER_NICKNAME: 'user_nickname',
   DOUBLE_CLICK_DELAY: 500
 };
 

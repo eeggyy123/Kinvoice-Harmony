@@ -23,6 +23,7 @@ interface ContextMenuState {
 
 @Component
 struct CompanionTab {
+  @Prop refreshTrigger: number = 0;
   @State messageText: string = '';
   @State messages: MessageItem[] = [];
   @State isThinking: boolean = false;
@@ -380,6 +381,13 @@ struct CompanionTab {
     this.restoreCurrentConv();
     this.syncFromBackend();
     this.fetchFamilyId();
+  }
+
+  @Watch('onRefreshTriggerChange')
+  onRefreshTriggerChange(): void {
+    if (this.mounted) {
+      this.syncFromBackend();
+    }
   }
 
   aboutToDisappear(): void {
